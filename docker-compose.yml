@@ -4,14 +4,18 @@ services:
     image: 'gitlab/gitlab-ce:latest'
     restart: always
     privileged: true
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://140.124.183.58'
+        gitlab_rails['gitlab_shell_ssh_port'] = 8022
     ports:
       - '80:80'
       - '443:443'
-      - '22:22'
+      - '8022:22'
     volumes:
-      - 'C:\GitLab\config\:/etc/gitlab'
-      - 'C:\GitLab\logs\:/var/log/gitlab'
-      - 'C:\GitLab\data\:/var/opt/gitlab'
+      - '$GITLAB_HOME:/etc/gitlab'
+      - '$GITLAB_HOME:/var/log/gitlab'
+      - '$GITLAB_HOME:/var/opt/gitlab'
   jenkins:
     image: "jenkins/jenkins:latest"
     restart: always
@@ -20,4 +24,9 @@ services:
       - '4439:8080'
       - '50000:50000'
     volumes:
-      - 'C:\Jenkins\:/var/jenkins_home'
+      - '$JENKINS_HOME:/var/jenkins_home'
+  runner:
+    build: ./nachos_docker
+    restart: always
+    privileged: true
+    tty: true

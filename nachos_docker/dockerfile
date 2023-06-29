@@ -1,0 +1,29 @@
+FROM ubuntu:22.04
+
+# nachos environment requirements
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+RUN sed 's@archive.ubuntu.com@free.nchc.org.tw@' -i /etc/apt/sources.list
+RUN apt-get update 
+RUN apt-get install -y build-essential
+RUN dpkg --add-architecture i386 && dpkg --print-foreign-architectures && dpkg --add-architecture i386 && apt-get update
+RUN apt-get install -y csh gcc ed openjdk-11-jdk g++ ssh git gcc-multilib g++-multilib lib32ncurses6 lib32z1 zlib1g:i386 libstdc++6:i386 libc6:i386 libncurses5:i386 libgcc1:i386 libstdc++5:i386
+
+# isolate environment requirements
+RUN mkdir /etc/isolate
+RUN apt-get install -y libcap-dev
+RUN git clone https://github.com/ioi/isolate.git /etc/isolate
+WORKDIR /etc/isolate
+RUN make isolate
+RUN make install
+RUN isolate --version
+
+# nachos environment setup
+ADD nachos_requirements /nachos-requirements/
+WORKDIR /
+RUN mv /nachos-requirements/mips-decstation.linux-xgcc.gz /mips-decstation.linux-xgcc.gz
+RUN tar -xvzf mips-decstation.linux-xgcc.gz
+RUN cp -r /nachos-requirements/usr/local/nachos /usr/local/nachos
+
+RUN echo 'root:@runner2023' | chpasswd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+ENTRYPOINT service ssh restart && bash
