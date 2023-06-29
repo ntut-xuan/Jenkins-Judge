@@ -1,0 +1,23 @@
+version: '3.6'
+services:
+  web:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    privileged: true
+    ports:
+      - '80:80'
+      - '443:443'
+      - '22:22'
+    volumes:
+      - 'C:\GitLab\config\:/etc/gitlab'
+      - 'C:\GitLab\logs\:/var/log/gitlab'
+      - 'C:\GitLab\data\:/var/opt/gitlab'
+  jenkins:
+    image: "jenkins/jenkins:latest"
+    restart: always
+    privileged: true
+    ports:
+      - '4439:8080'
+      - '50000:50000'
+    volumes:
+      - 'C:\Jenkins\:/var/jenkins_home'
